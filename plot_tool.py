@@ -22,7 +22,7 @@ class PlotTool:
 		self.t += 1
 	
 	def show(self):
-		t_list = (np.array([i for i in range(0, self.t)])).astype(np.int16)
+		t_list = np.array([i for i in range(0, self.t)])
 		for i in range(len(self.y)):
 			plt.plot(t_list, self.y[i])
 		plt.xlabel('time')
