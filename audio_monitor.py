@@ -24,6 +24,8 @@ odi = None
 
 data_int = np.zeros(2*CHUNK)
 
+exit_flag = False
+
 def convertDataToArray(data):
     data_int = np.frombuffer(data, dtype=np.int16)
     if byteorder == 'big':
@@ -83,11 +85,8 @@ def main():
 
     print("start")
     
-    while stream.is_active():
+    while (stream.is_active() and not exit_flag):
         try:
-            #y = np.random.rand(2*CHUNK)
-            #plt.pause(0.001)
-            #fig.pause(0.05)
             time.sleep(0.05)
         except KeyboardInterrupt:
             print('interrupted')
@@ -107,22 +106,19 @@ def maintainGraph():
     y = np.zeros(2*CHUNK)
     
     plt.ion()
-    
-    plt.axis([0, 2*CHUNK, -40000, 40000])
     fig = plt.figure()
     ax = fig.add_subplot(111)
     line1, = ax.plot(x, y, 'b-')
 
-    fig.canvas.draw()
-    fig.canvas.flush_events()
-    
-    while True:
+    plt.axis([0, 2*CHUNK, -40000, 40000])
+
+    while (not exit_flag):
         try:
-            plt.axis([0, 2*CHUNK, -40000, 40000])
             line1.set_ydata(data_int)
+            # Update graph
             fig.canvas.draw()
-            #plt.pause(0.001)
             fig.canvas.flush_events()
+            time.sleep(0.01)
         except KeyboardInterrupt:
             print('interrupted')
             break
@@ -131,13 +127,15 @@ def maintainGraph():
     
 if __name__ == "__main__":
     print("started")
-    try:
-        threading.Thread(target=main).start()
-        threading.Thread(target=maintainGraph).start()
-        #_thread.start_new_thread(maintainGraph, ())
-    except KeyboardInterrupt:
-        print('interrupted')
-    except:
-        print("Error: unable to start thread")
-    #main()
+    threading.Thread(target=main).start()
+    threading.Thread(target=maintainGraph).start()
+    while True:
+        try:
+            time.sleep(0.05)
+        except KeyboardInterrupt:
+            print('interrupted')
+            exit_flag = True
+            break
+        except:
+            print("Error: unable to start thread")
     print("ended")
