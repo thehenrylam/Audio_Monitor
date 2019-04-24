@@ -27,6 +27,9 @@ data_int = np.zeros(2*CHUNK)
 exit_flag = False
 
 def convertDataToArray(data):
+    #print()
+    #print(data)
+    #print()
     data_int = np.frombuffer(data, dtype=np.int16)
     if byteorder == 'big':
         data_int = data_int.byteswap()
@@ -46,13 +49,13 @@ def selectIO(p):
     # Have the user select the program's input
     idi = input("What input device should be used? (default: {})\n".format(p.get_default_input_device_info()['index']))
     if (idi == ""):
-        idi = p.get_default_input_device_info()
+        idi = p.get_default_input_device_info()['index']
     else:
         idi = int(idi)
     # Have the user select the program's output
     odi = input("What output device should be used? (default: {})\n".format(p.get_default_output_device_info()['index']))
     if (odi == ""):
-        odi = p.get_default_output_device_info()
+        odi = p.get_default_output_device_info()['index']
     else:
         odi = int(odi)
     
@@ -68,8 +71,12 @@ def main():
     def callback(in_data, frame_count, time_info, status):
         global data_int
         data_int = convertDataToArray(in_data)
+        in_data = data_int.tobytes()
         #print("{} : {}".format(data_int, len(data_int)))
         return (in_data, pyaudio.paContinue)
+
+    print(idi)
+    print(odi)
 
     stream = p.open(format=p.get_format_from_width(WIDTH),
                     channels=CHANNELS,
