@@ -1,4 +1,8 @@
 # AudioStream.py
+from CommonData import *
+
+import struct
+import pyaudio
 import threading
 import time
 
@@ -11,13 +15,18 @@ class AudioStream:
     
     def __init__(self):
         self._p = pyaudio.PyAudio()
+        
         self._input_index = None
         self._output_index = None
+        
         self._loop_active = True
+        self._thread = None
+        
+        self._data = AudioData()
         
         return
     
-    def setDeviceIndex():
+    def setDeviceIndex(self):
         device_count = self._p.get_device_count()
         
         # Print out device's IO information to the user
@@ -34,9 +43,9 @@ class AudioStream:
         
         # Have the user select the program's input
         i_input = input("What input device should be used? (default: {})\n".format(self._input_index))
-        if (i_index != ""):
+        if (i_input != ""):
             try:
-                self._input_index = int(i_index)
+                self._input_index = int(i_input)
             except:
                 pass
         
@@ -53,10 +62,17 @@ class AudioStream:
     def _doStreamLoop(self):
         
         def callback(in_data, frame_count, time_info, status):
+            self._data.setDataIn(in_data)
+            #silence = chr(0)*1024*2*2
+            #tmp_data = self._data.getDataOut()
+            #if (tmp_data is not None):
+                #in_data = tmp_data
+            #in_data = silence
+            
             return (in_data, pyaudio.paContinue)
         
         stream = self._p.open(
-                format=self._p.get_format_from_width( AudioStream.WIDTH )
+                format=self._p.get_format_from_width( AudioStream.WIDTH ),
                 channels= AudioStream.CHANNELS,
                 rate= AudioStream.RATE,
                 input= True,
@@ -67,11 +83,9 @@ class AudioStream:
             )
         
         stream.start_stream()
-        
-        self._loop_active = True
-        
-        while (stream.is_active() and not self._loop_active):
-            time.sleep(0.05)
+                
+        while (stream.is_active() and self._loop_active):
+            time.sleep(0.1)
         
         stream.stop_stream()
         stream.close()
@@ -81,14 +95,40 @@ class AudioStream:
         return
     
     def startStreamLoop(self):
-        threading.Thread(target=self._doStreamLoop).start()
+        if (self._thread is not None):
+            if (self._thread.is_alive()):
+                return False
+            self._thread = None
         
-        return
+        self._loop_active = True
+        self._thread = threading.Thread(target=self._doStreamLoop)
+        self._thread.start()
+        return True
     
     def haltStreamLoop(self):
+        if (self._thread is None):
+            return False
+        elif (not self._thread.is_alive()):
+            self._thread = None
+            return False            
         self._loop_active = False
-        
+        self._thread.join(timeout = 1)
+        self._thread = None
+
         return
+
+def _test():
+    audio_stream = AudioStream()
     
+    audio_stream.setDeviceIndex()
+    
+    audio_stream.startStreamLoop()
+    
+    input("blocked; press any key to exit")
+    
+    audio_stream.haltStreamLoop()
+    
+if __name__ == "__main__":
+    _test()
     
     

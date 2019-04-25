@@ -16,7 +16,7 @@ class AudioData():
         text = "data_i: {}\ndata_o: {}".format(self._data_in, self._data_out)
         return
     
-    def _convertByteToArray(data):
+    def _convertByteToArray(self, data):
         data_int = np.frombuffer(data, dtype=np.int16)
         
         if byteorder == 'big':
@@ -25,7 +25,7 @@ class AudioData():
         return data_int
     
     def setDataIn(self, data_in):
-        if (type(data_in) is byte):
+        if (type(data_in) is bytes):
             AudioData._data_in = self._convertByteToArray(data_in)
         elif (type(data_in) is np.ndarray):
             AudioData._data_in = data_in
@@ -45,8 +45,8 @@ class AudioData():
     def getDataOut(self):
         return AudioData._data_out
 
-def test():
+def _test():
     print("Need to do this!")
     
 if __name__ == "__main__":
-    test()
+    _test()
