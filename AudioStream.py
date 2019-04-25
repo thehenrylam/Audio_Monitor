@@ -68,7 +68,7 @@ class AudioStream:
             self._data.setDataIn(in_data)
             tmp_data = self._data.getDataOut()
             if (tmp_data is not None):
-                in_data = tmp_data
+                in_data = tmp_data.tobytes()
             
             return (in_data, pyaudio.paContinue)
         
