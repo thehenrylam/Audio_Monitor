@@ -9,9 +9,6 @@ import time
 class AudioProcessor:
     
     CHUNK    = 1024
-    WIDTH    = 2
-    CHANNELS = 2
-    RATE     = 44100
     
     DEFAULT_ARRAY = np.zeros( 2 * CHUNK )
     

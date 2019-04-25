@@ -3,6 +3,7 @@ from CommonData import *
 
 import struct
 import pyaudio
+import wave
 import threading
 import time
 
@@ -27,6 +28,8 @@ class AudioStream:
         return
     
     def setDeviceIndex(self):
+        #print(self._p.get_device_info_by_index(0))
+        
         device_count = self._p.get_device_count()
         
         # Print out device's IO information to the user
@@ -63,11 +66,9 @@ class AudioStream:
         
         def callback(in_data, frame_count, time_info, status):
             self._data.setDataIn(in_data)
-            #silence = chr(0)*1024*2*2
-            #tmp_data = self._data.getDataOut()
-            #if (tmp_data is not None):
-                #in_data = tmp_data
-            #in_data = silence
+            tmp_data = self._data.getDataOut()
+            if (tmp_data is not None):
+                in_data = tmp_data
             
             return (in_data, pyaudio.paContinue)
         
